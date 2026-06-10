@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Antiage PSG</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#F5EDD6;--gold-mid:#E8D5A3;--gold-dark:#8C6D28;
+  --ink:#1A1A2E;--ink-mid:#3D3D5C;--ink-light:#6B6B8A;
+  --bg:#F7F5F0;--white:#FFFFFF;
+  --green:#2A9D6F;--green-light:#E0F4EC;
+  --amber:#C07A1A;--amber-light:#FDF0DC;
+  --red:#B03A3A;--red-light:#FAEAEA;
+  --border:#E2DDD4;
+}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:1.5rem}
+.container{max-width:900px;margin:0 auto}
+
+/* HEADER */
+.header{background:var(--ink);border-radius:16px;padding:1.75rem 2rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.header-left{display:flex;align-items:center;gap:16px}
+.avatar{width:52px;height:52px;border-radius:10px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:.02em;flex-shrink:0}
+.centro-name{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.02em}
+.centro-sub{font-size:12px;color:var(--gold-mid);margin-top:3px;letter-spacing:.04em;text-transform:uppercase}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.skinem-brand{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.sk-line{width:20px;height:2px;background:var(--gold)}
+.badge{font-size:11px;padding:5px 14px;border-radius:99px;font-weight:700;letter-spacing:.03em}
+.badge-gold{background:var(--gold);color:var(--ink)}
+
+/* TABS */
+.tab-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{font-size:13px;padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);color:var(--ink-light);cursor:pointer;font-weight:600;transition:all .15s}
+.tab:hover{border-color:var(--gold);color:var(--gold-dark)}
+.tab.active{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:800}
+
+.aggiornato{font-size:11px;color:var(--ink-light);text-align:right;margin-bottom:.75rem;letter-spacing:.02em}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.metric{background:var(--white);border-radius:12px;padding:1rem 1.1rem;border:1px solid var(--border)}
+.metric.highlight{border-top:3px solid var(--gold)}
+.m-label{font-size:11px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-weight:600}
+.m-value{font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.02em}
+.m-delta{font-size:11px;margin-top:4px;color:var(--ink-light)}
+.green{color:var(--green)}.amber{color:var(--amber)}.red{color:var(--red)}.gold{color:var(--gold-dark)}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.card-accent{border-left:3px solid var(--gold)}
+.sl{font-size:10px;font-weight:800;color:var(--ink-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+
+/* TABLE */
+table{width:100%;font-size:13px;border-collapse:collapse}
+th{font-size:10px;font-weight:800;color:var(--ink-light);text-align:left;padding:5px 8px 10px;border-bottom:2px solid var(--gold-light);text-transform:uppercase;letter-spacing:.06em}
+td{padding:8px 8px;border-bottom:1px solid var(--bg)}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+tr.total td{font-weight:800;border-top:2px solid var(--gold-light);background:var(--gold-light);color:var(--ink)}
+
+/* OBIETTIVI */
+.ob-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ob-label{font-size:12px;flex:1;font-weight:600;color:var(--ink-mid)}
+.ob-bar{flex:2;height:7px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+.ob-fill{height:100%;border-radius:99px;transition:width .4s}
+.ob-val{font-size:12px;font-weight:800;min-width:40px;text-align:right}
+
+/* NOTE */
+.note-box{background:var(--ink);border-radius:10px;padding:1.25rem 1.5rem;font-size:13px;line-height:1.75;color:#C8C8D8}
+.note-head{display:flex;justify-content:space-between;margin-bottom:10px;align-items:center}
+.note-head .sl{margin:0;color:var(--gold)}
+.note-head span{font-size:11px;color:var(--ink-light)}
+
+/* ALERT */
+.alert-box{background:var(--amber-light);border:1px solid var(--gold-mid);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert-text{font-size:12px;line-height:1.6;color:var(--ink-mid)}
+.alert-text strong{color:var(--amber);font-weight:800}
+
+/* FUNNEL */
+.funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.fstep{border-radius:10px;padding:1rem;text-align:center;border:1px solid var(--border)}
+.fstep-num{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.fstep-label{font-size:10px;font-weight:800;margin-top:5px;text-transform:uppercase;letter-spacing:.06em}
+.fstep-sub{font-size:10px;margin-top:3px;opacity:.7}
+.f1{background:var(--gold-light);color:var(--gold-dark)}
+.f2{background:var(--gold-mid);color:var(--ink)}
+.f3{background:var(--gold);color:var(--ink)}
+.f4{background:var(--ink);color:var(--gold)}
+
+/* CAPACITÀ */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0}
+.met{background:var(--bg);border-radius:8px;padding:.85rem 1rem;border:1px solid var(--border)}
+.ml{font-size:11px;color:var(--ink-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.mv{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.ms{font-size:11px;color:var(--ink-light);margin-top:2px}
+
+/* DB METER */
+.db-bar{background:var(--bg);border-radius:10px;padding:1rem 1.25rem;border:1px solid var(--border);margin-bottom:10px}
+.db-title{font-size:11px;font-weight:800;color:var(--ink-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.db-track{height:10px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.db-fill{height:100%;border-radius:99px}
+.db-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-light);font-weight:600}
+
+/* FOOTER */
+.footer{display:flex;justify-content:space-between;align-items:center;padding-top:1.25rem;border-top:2px solid var(--gold-light);margin-top:.5rem;font-size:12px;color:var(--ink-light)}
+.logo{font-size:13px;font-weight:800;color:var(--gold-dark);letter-spacing:.08em}
+
+.loading{text-align:center;padding:2.5rem;color:var(--ink-light);font-size:13px}
+.spinner{display:inline-block;width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .funnel{grid-template-columns:repeat(2,1fr)}
+  .grid3{grid-template-columns:1fr}
+  .header{padding:1.25rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="avatar">AP</div>
+      <div>
+        <div class="centro-name">Antiage PSG</div>
+        <div class="centro-sub">3 operatrici · Lun–Sab · Porto San Giorgio</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="skinem-brand"><span class="sk-line"></span>SKINEM</div>
+      <span class="badge badge-gold">Alto potenziale</span>
+    </div>
+  </div>
+
+  <div class="alert-box">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text">
+      <strong>Database sottoutilizzato — intervento prioritario.</strong>
+      1.500 clienti nel CRM, 45 attive = tasso attivazione <strong>3%</strong>.
+      Con un protocollo di riattivazione strutturato, anche solo portare il tasso al 9% significa <strong>135 clienti attive</strong> e €20.000/mese raggiungibili con le risorse esistenti.
+    </div>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab" onclick="caricaMese('giugno',this)">Giugno 2026</button>
+    <button class="tab" onclick="caricaMese('luglio',this)">Luglio 2026</button>
+    <button class="tab" onclick="caricaMese('agosto',this)">Agosto 2026</button>
+  </div>
+
+  <div id="aggiornato" class="aggiornato"></div>
+  <div id="contenuto"><div class="loading"><div class="spinner"></div><br>Caricamento dati...</div></div>
+
+  <!-- CAPACITÀ -->
+  <div class="card card-accent">
+    <p class="sl">Capacità produttiva — 3 operatrici (Lun–Sab)</p>
+    <div class="grid3">
+      <div class="met"><div class="ml">Slot tot./giorno</div><div class="mv gold">18</div><div class="ms">3 op. × 6 slot × 80 min</div></div>
+      <div class="met"><div class="ml">Clienti max/sett.</div><div class="mv gold">108</div><div class="ms">6 giorni × 18 slot</div></div>
+      <div class="met"><div class="ml">Potenziale mensile</div><div class="mv green">€64.800</div><div class="ms">a scontrino €150</div></div>
+    </div>
+  </div>
+
+  <!-- DATABASE -->
+  <div class="card">
+    <p class="sl">Stato database clienti</p>
+    <div class="db-bar">
+      <div class="db-title">Clienti attive su totale database</div>
+      <div class="db-track"><div class="db-fill" style="width:3%;background:var(--red)"></div></div>
+      <div class="db-labels"><span class="red">45 attive (3%)</span><span>1.500 totali</span></div>
+    </div>
+    <div class="db-bar" style="margin-bottom:0">
+      <div class="db-title">Target attivazione per €20.000/mese</div>
+      <div class="db-track"><div class="db-fill" style="width:9%;background:var(--gold)"></div></div>
+      <div class="db-labels"><span class="gold">135 clienti (9%)</span><span>obiettivo minimo</span></div>
+    </div>
+  </div>
+
+  <!-- FUNNEL -->
+  <div class="card card-accent">
+    <p class="sl">Funnel marketing</p>
+    <div class="funnel">
+      <div class="fstep f1"><div class="fstep-num">0</div><div class="fstep-label">Nuovi lead</div><div class="fstep-sub">Instagram · WhatsApp</div></div>
+      <div class="fstep f2"><div class="fstep-num">0</div><div class="fstep-label">Consulenze</div><div class="fstep-sub">— dei lead</div></div>
+      <div class="fstep f3"><div class="fstep-num">0</div><div class="fstep-label">Pacchetti</div><div class="fstep-sub">— delle cons.</div></div>
+      <div class="fstep f4"><div class="fstep-num">€0</div><div class="fstep-label">Valore</div><div class="fstep-sub">€0 medio/pacco</div></div>
+    </div>
+  </div>
+
+  <!-- NOTE -->
+  <div class="card">
+    <div class="note-head"><p class="sl" style="margin:0;color:var(--gold)">Note del consulente</p><span>Aggiornato giu 2026</span></div>
+    <div class="note-box">Con 1.500 unità nel database e un tasso di attivazione del 3% (45 clienti ricorrenti), il problema non è la capacità produttiva ma la gestione del parco clienti dormiente. A €98 di trattamento minimo, uno scontrino medio sotto €130 indica assenza sistematica di upselling in cabina. Priorità: protocollo di riattivazione database + script di abbinamento trattamenti per portare ogni passaggio da singolo a doppio. Il potenziale da €20.000/mese è strutturalmente raggiungibile con le risorse attuali.</div>
+  </div>
+
+  <div class="footer">
+    <div class="logo">SKINEM</div>
+    <span>Consulenza <strong style="color:var(--ink)">Enzo Evandri</strong> — Dashboard riservata al centro</span>
+  </div>
+
+</div>
+
+<script>
+const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTCENnwJNWW7YQx0V1CnioxZxGYND_nNIjh_WvFzbxiyRGx1X9o0iKjkhGrnHryCPIAXBUnCcW6Bj2G/pub?single=true&output=csv';
+
+const CSV_URLS = {
+  'giugno': BASE + '&gid=1862691590',
+  'luglio': BASE + '&gid=634202262',
+  'agosto': BASE + '&gid=1590703847'
+};
+
+const OB_INCASSO   = 20000;
+const OB_SCONTRINO = 150;
+const OB_PRODOTTI  = 1500;
+
+// Lun–Sab = 1,2,3,4,5,6
+const GIORNI_LAV = [1,2,3,4,5,6];
+
+function fmt(n){ return '€'+parseFloat(n).toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function colBar(p){ return p>=75?'var(--green)':p>=40?'var(--amber)':'var(--red)'; }
+function colClass(p){ return p>=75?'green':p>=40?'amber':'red'; }
+
+function parseCSV(text){
+  var lines = text.trim().split('\n');
+  // Cerca la riga header (quella con Data,Giorno...)
+  var headerIdx = -1;
+  for(var i=0;i<lines.length;i++){
+    if(lines[i].indexOf('Data') !== -1 && lines[i].indexOf('Giorno') !== -1){ headerIdx=i; break; }
+  }
+  if(headerIdx < 0) return [];
+  var headers = lines[headerIdx].split(',').map(h=>h.trim().replace(/"/g,''));
+  var rows = [];
+  for(var i=headerIdx+1;i<lines.length;i++){
+    var vals = lines[i].split(',').map(v=>v.trim().replace(/"/g,'').replace('€','').replace('.','').replace(',','.'));
+    if(vals.length < 2) continue;
+    // Salta righe di label settimana e totali
+    if(!vals[0] || vals[0].indexOf('SETTIMANA') !== -1 || vals[0].indexOf('—') !== -1 || vals[1]==='') continue;
+    if(vals[0].indexOf('TOTALE') !== -1) continue;
+    var obj = {};
+    headers.forEach((h,j)=>obj[h]=vals[j]||'');
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function parseData(dataStr){
+  if(!dataStr) return null;
+  var parts = dataStr.split('/');
+  if(parts.length < 3) return null;
+  return new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+}
+
+function settimanaDelMese(dataStr){
+  var d = parseData(dataStr);
+  if(!d) return 0;
+  var primo = new Date(d.getFullYear(), d.getMonth(), 1);
+  var diff = Math.floor((d - primo) / 86400000);
+  var offset = primo.getDay() === 0 ? 6 : primo.getDay() - 1;
+  return Math.floor((diff + offset) / 7) + 1;
+}
+
+function giorniLavMese(anno, mese){
+  var ultimo = new Date(anno, mese, 0).getDate();
+  var count = 0;
+  for(var g=1;g<=ultimo;g++){
+    var d = new Date(anno, mese-1, g);
+    if(GIORNI_LAV.indexOf(d.getDay()) !== -1) count++;
+  }
+  return count;
+}
+
+function caricaMese(mese, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('contenuto').innerHTML = '<div class="loading"><div class="spinner"></div><br>Caricamento dati...</div>';
+
+  var url = CSV_URLS[mese];
+  fetch(url)
+    .then(r=>r.text())
+    .then(text=>renderMese(parseCSV(text), mese))
+    .catch(()=>{
+      fetch('https://corsproxy.io/?'+encodeURIComponent(url))
+        .then(r=>r.text())
+        .then(text=>renderMese(parseCSV(text), mese))
+        .catch(()=>{
+          fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url))
+            .then(r=>r.text())
+            .then(text=>renderMese(parseCSV(text), mese))
+            .catch(()=>{ document.getElementById('contenuto').innerHTML='<div class="loading">Errore caricamento. Riprova.</div>'; });
+        });
+    });
+}
+
+function renderMese(dati, mese){
+  var nomi = {giugno:'Giugno 2026', luglio:'Luglio 2026', agosto:'Agosto 2026'};
+  var mesiNum = {giugno:6, luglio:7, agosto:8};
+  var nomeMese = nomi[mese];
+  var numMese = mesiNum[mese];
+
+  // Filtra righe con Totale > 0
+  var righe = dati.filter(r => r.Totale && parseFloat(r.Totale) > 0);
+  var giorniLavorati = righe.length;
+  var giorniTotali = giorniLavMese(2026, numMese);
+
+  var totIncasso    = righe.reduce((s,r)=>s+parseFloat(r.Totale||0),0);
+  var totTratt      = righe.reduce((s,r)=>s+parseFloat(r['Incasso Tratt']||0),0);
+  var totProdotti   = righe.reduce((s,r)=>s+parseFloat(r['Incasso Prodotti']||0),0);
+  var totClienti    = righe.reduce((s,r)=>s+parseInt(r.Clienti||0),0);
+  var totOre        = righe.reduce((s,r)=>s+parseFloat(r['Ore Lavorate']||0),0);
+  var scontrino     = totClienti>0 ? totTratt/totClienti : 0;
+  var mediaClienti  = giorniLavorati>0 ? (totClienti/giorniLavorati).toFixed(1) : 0;
+  var tassoApertura = giorniTotali>0 ? Math.round(giorniLavorati/giorniTotali*100) : 0;
+
+  var percIncasso   = Math.min(Math.round(totIncasso/OB_INCASSO*100),100);
+  var percScontrino = scontrino>0 ? Math.min(Math.round(scontrino/OB_SCONTRINO*100),100) : 0;
+  var percProdotti  = totProdotti>0 ? Math.min(Math.round(totProdotti/OB_PRODOTTI*100),100) : 0;
+
+  // Settimane
+  var settimane = {};
+  righe.forEach(r=>{
+    var s = settimanaDelMese(r.Data);
+    if(!settimane[s]) settimane[s]={incasso:0,tratt:0,prodotti:0,clienti:0,ore:0,date:[],giorni:0};
+    settimane[s].incasso  += parseFloat(r.Totale||0);
+    settimane[s].tratt    += parseFloat(r['Incasso Tratt']||0);
+    settimane[s].prodotti += parseFloat(r['Incasso Prodotti']||0);
+    settimane[s].clienti  += parseInt(r.Clienti||0);
+    settimane[s].ore      += parseFloat(r['Ore Lavorate']||0);
+    settimane[s].date.push(r.Data);
+    settimane[s].giorni++;
+  });
+
+  var settKeys = Object.keys(settimane).sort((a,b)=>parseInt(a)-parseInt(b));
+  var righeTabSett = '';
+  var prevInc = 0;
+  settKeys.forEach((s,i)=>{
+    var sv = settimane[s];
+    var sc = sv.clienti>0 ? sv.tratt/sv.clienti : 0;
+    var trend = i>0&&prevInc>0 ? Math.round((sv.incasso-prevInc)/prevInc*100) : null;
+    var trendHtml = trend!==null ? '<span class="'+(trend>=0?'green':'red')+'">'+(trend>=0?'+':'')+trend+'%</span>' : '—';
+    var range = sv.date.length>0 ? sv.date[0]+' – '+sv.date[sv.date.length-1] : '';
+    righeTabSett += '<tr><td>'+s+'ª sett.<br><small style="color:var(--ink-light)">'+range+' · '+sv.giorni+' gg</small></td><td>'+sv.clienti+'</td><td class="num">'+fmt(sv.incasso)+'</td><td class="num '+colClass(Math.round(sc/OB_SCONTRINO*100))+'">'+fmt(sc)+'</td><td class="num">'+trendHtml+'</td></tr>';
+    prevInc = sv.incasso;
+  });
+
+  var righeGiorni = '';
+  righe.forEach(r=>{
+    var inc = parseFloat(r.Totale||0);
+    var tratt = parseFloat(r['Incasso Tratt']||0);
+    var cli = parseInt(r.Clienti||0);
+    var sc = cli>0 ? tratt/cli : 0;
+    var prod = parseFloat(r['Incasso Prodotti']||0);
+    righeGiorni += '<tr><td>'+r.Data+'</td><td>'+r.Giorno+'</td><td>'+cli+'</td><td class="num">'+fmt(tratt)+'</td><td class="num '+colClass(Math.round(sc/OB_SCONTRINO*100))+'">'+fmt(sc)+'</td><td class="num">'+(prod>0?fmt(prod):'—')+'</td><td class="num">'+fmt(inc)+'</td></tr>';
+  });
+
+  if(!righeTabSett) righeTabSett = '<tr><td colspan="5" style="text-align:center;color:var(--ink-light);padding:1.25rem">Nessun dato ancora per '+nomeMese+'</td></tr>';
+  if(!righeGiorni)  righeGiorni  = '<tr><td colspan="7" style="text-align:center;color:var(--ink-light);padding:1.25rem">Nessun dato ancora per '+nomeMese+'</td></tr>';
+
+  document.getElementById('aggiornato').textContent = 'Aggiornato: '+new Date().toLocaleString('it-IT');
+
+  document.getElementById('contenuto').innerHTML =
+    '<p class="sl">Riepilogo '+nomeMese+'</p>'+
+    '<div class="metrics-grid">'+
+      '<div class="metric highlight"><div class="m-label">Incasso totale</div><div class="m-value '+(totIncasso>0?colClass(percIncasso):'')+'">'+( totIncasso>0?fmt(totIncasso):'—')+'</div><div class="m-delta">'+giorniLavorati+' gg lavorati / '+giorniTotali+'</div></div>'+
+      '<div class="metric"><div class="m-label">Clienti servite</div><div class="m-value">'+(totClienti>0?totClienti:'—')+'</div><div class="m-delta">'+(giorniLavorati>0?'~'+mediaClienti+'/giorno':'nessun dato')+'</div></div>'+
+      '<div class="metric"><div class="m-label">Scontrino medio</div><div class="m-value '+(scontrino>0?colClass(percScontrino):'')+'">'+( scontrino>0?fmt(scontrino):'—')+'</div><div class="m-delta amber">min €98 · ob. '+fmt(OB_SCONTRINO)+'</div></div>'+
+      '<div class="metric"><div class="m-label">Tasso apertura</div><div class="m-value '+colClass(tassoApertura)+'">'+(giorniLavorati>0?tassoApertura+'%':'—')+'</div><div class="m-delta">lun–sab effettivi</div></div>'+
+    '</div>'+
+
+    '<div class="card card-accent"><p class="sl">Andamento settimanale — '+nomeMese+'</p>'+
+    '<table><thead><tr><th>Settimana</th><th>Clienti</th><th class="num">Incasso</th><th class="num">Scontrino</th><th class="num">Trend</th></tr></thead>'+
+    '<tbody>'+righeTabSett+'</tbody>'+
+    '<tr class="total"><td>Totale '+nomeMese+'</td><td>'+(totClienti||'—')+'</td><td class="num">'+(totIncasso>0?fmt(totIncasso):'—')+'</td><td class="num '+colClass(percScontrino)+'">'+(scontrino>0?fmt(scontrino):'—')+'</td><td></td></tr>'+
+    '</table></div>'+
+
+    '<div class="card"><p class="sl">Dettaglio giornaliero · Lun–Sab</p>'+
+    '<table><thead><tr><th>Data</th><th>Giorno</th><th>Clienti</th><th class="num">Tratt.</th><th class="num">Scontrino</th><th class="num">Prodotti</th><th class="num">Totale</th></tr></thead>'+
+    '<tbody>'+righeGiorni+'</tbody></table></div>'+
+
+    '<div class="card card-accent"><p class="sl">Obiettivi '+nomeMese+'</p>'+
+    '<div class="ob-row"><div class="ob-label">Incasso mensile ('+fmt(OB_INCASSO)+')</div><div class="ob-bar"><div class="ob-fill" style="width:'+percIncasso+'%;background:'+colBar(percIncasso)+'"></div></div><div class="ob-val '+colClass(percIncasso)+'">'+(totIncasso>0?percIncasso+'%':'—')+'</div></div>'+
+    '<div class="ob-row"><div class="ob-label">Scontrino medio ('+fmt(OB_SCONTRINO)+')</div><div class="ob-bar"><div class="ob-fill" style="width:'+percScontrino+'%;background:'+colBar(percScontrino)+'"></div></div><div class="ob-val '+colClass(percScontrino)+'">'+(scontrino>0?percScontrino+'%':'—')+'</div></div>'+
+    '<div class="ob-row" style="margin-bottom:0"><div class="ob-label">Vendita prodotti ('+fmt(OB_PRODOTTI)+')</div><div class="ob-bar"><div class="ob-fill" style="width:'+percProdotti+'%;background:'+colBar(percProdotti)+'"></div></div><div class="ob-val '+colClass(percProdotti)+'">'+(totProdotti>0?percProdotti+'%':'—')+'</div></div>'+
+    '</div>';
+}
+
+caricaMese('giugno', document.querySelector('.tab'));
+</script>
+</body>
+</html>
