@@ -182,12 +182,12 @@ tr.total td{font-weight:800;border-top:2px solid var(--gold-light);background:va
 
   <!-- FUNNEL -->
   <div class="card card-accent">
-    <p class="sl">Funnel marketing</p>
+    <p class="sl">Funnel conversione — anamnesi → vendita</p>
     <div class="funnel">
-      <div class="fstep f1"><div class="fstep-num">0</div><div class="fstep-label">Nuovi lead</div><div class="fstep-sub">Instagram · WhatsApp</div></div>
-      <div class="fstep f2"><div class="fstep-num">0</div><div class="fstep-label">Consulenze</div><div class="fstep-sub">— dei lead</div></div>
-      <div class="fstep f3"><div class="fstep-num">0</div><div class="fstep-label">Pacchetti</div><div class="fstep-sub">— delle cons.</div></div>
-      <div class="fstep f4"><div class="fstep-num">€0</div><div class="fstep-label">Valore</div><div class="fstep-sub">€0 medio/pacco</div></div>
+      <div class="fstep f1"><div class="fstep-num" id="funnel-clienti">0</div><div class="fstep-label">Clienti servite</div><div class="fstep-sub">passaggi in cabina</div></div>
+      <div class="fstep f2"><div class="fstep-num" id="funnel-anamnesi">0</div><div class="fstep-label">Anamnesi</div><div class="fstep-sub" id="funnel-anamnesi-sub">— dei clienti</div></div>
+      <div class="fstep f3"><div class="fstep-num" id="funnel-vendite">0</div><div class="fstep-label">Vendite</div><div class="fstep-sub" id="funnel-vendite-sub">— delle anamn.</div></div>
+      <div class="fstep f4"><div class="fstep-num" id="funnel-valore">€0</div><div class="fstep-label">Prodotti</div><div class="fstep-sub" id="funnel-valore-sub">€0 medio/vendita</div></div>
     </div>
   </div>
 
@@ -235,7 +235,24 @@ function parseCSV(text){
   var headers = lines[headerIdx].split(',').map(h=>h.trim().replace(/"/g,''));
   var rows = [];
   for(var i=headerIdx+1;i<lines.length;i++){
-    var vals = lines[i].split(',').map(v=>v.trim().replace(/"/g,'').replace('€','').replace('.','').replace(',','.'));
+    // Gestione campi tra virgolette (es: "€1.426,00") — split rispettando le quotes
+    var raw = lines[i];
+    var fields = [];
+    var inQuote = false, cur = '';
+    for(var c=0;c<raw.length;c++){
+      var ch = raw[c];
+      if(ch==='"'){ inQuote=!inQuote; continue; }
+      if(ch===',' && !inQuote){ fields.push(cur); cur=''; continue; }
+      cur+=ch;
+    }
+    fields.push(cur);
+    // Pulisce ogni campo: toglie €, spazi, converte formato IT (punto migliaia, virgola decimale)
+    var vals = fields.map(v=>{
+      v = v.trim().replace(/€/g,'').replace(/\s/g,'');
+      // Rimuove punti migliaia e converte virgola decimale
+      v = v.replace(/\.(?=\d{3}(,|$))/g,'').replace(',','.');
+      return v;
+    });
     if(vals.length < 2) continue;
     // Salta righe di label settimana e totali
     if(!vals[0] || vals[0].indexOf('SETTIMANA') !== -1 || vals[0].indexOf('—') !== -1 || vals[1]==='') continue;
@@ -311,9 +328,12 @@ function renderMese(dati, mese){
   var totProdotti   = righe.reduce((s,r)=>s+parseFloat(r['Incasso Prodotti']||0),0);
   var totClienti    = righe.reduce((s,r)=>s+parseInt(r.Clienti||0),0);
   var totOre        = righe.reduce((s,r)=>s+parseFloat(r['Ore Lavorate']||0),0);
+  var totAnamnesi   = dati.reduce((s,r)=>s+(r.Anamnesi&&r.Anamnesi.trim()!==''?parseInt(r.Anamnesi)||0:0),0);
+  var totVendite    = dati.reduce((s,r)=>s+(r.Vendite&&r.Vendite.trim()!==''?parseInt(r.Vendite)||0:0),0);
   var scontrino     = totClienti>0 ? totTratt/totClienti : 0;
   var mediaClienti  = giorniLavorati>0 ? (totClienti/giorniLavorati).toFixed(1) : 0;
   var tassoApertura = giorniTotali>0 ? Math.round(giorniLavorati/giorniTotali*100) : 0;
+  var tassoConv     = totAnamnesi>0 ? Math.round(totVendite/totAnamnesi*100) : 0;
 
   var percIncasso   = Math.min(Math.round(totIncasso/OB_INCASSO*100),100);
   var percScontrino = scontrino>0 ? Math.min(Math.round(scontrino/OB_SCONTRINO*100),100) : 0;
@@ -353,13 +373,26 @@ function renderMese(dati, mese){
     var cli = parseInt(r.Clienti||0);
     var sc = cli>0 ? tratt/cli : 0;
     var prod = parseFloat(r['Incasso Prodotti']||0);
-    righeGiorni += '<tr><td>'+r.Data+'</td><td>'+r.Giorno+'</td><td>'+cli+'</td><td class="num">'+fmt(tratt)+'</td><td class="num '+colClass(Math.round(sc/OB_SCONTRINO*100))+'">'+fmt(sc)+'</td><td class="num">'+(prod>0?fmt(prod):'—')+'</td><td class="num">'+fmt(inc)+'</td></tr>';
+    var anam = r.Anamnesi&&r.Anamnesi.trim()!=='' ? '<span style="background:var(--gold-light);color:var(--gold-dark);padding:2px 8px;border-radius:99px;font-weight:700;font-size:11px">'+r.Anamnesi+'</span>' : '—';
+    var vend = r.Vendite&&r.Vendite.trim()!==''&&parseInt(r.Vendite)>0 ? '<span style="background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:99px;font-weight:700;font-size:11px">'+r.Vendite+'</span>' : '—';
+    righeGiorni += '<tr><td>'+r.Data+'</td><td>'+r.Giorno+'</td><td>'+cli+'</td><td class="num">'+fmt(tratt)+'</td><td class="num '+colClass(Math.round(sc/OB_SCONTRINO*100))+'">'+fmt(sc)+'</td><td class="num">'+(prod>0?fmt(prod):'—')+'</td><td style="text-align:center">'+anam+'</td><td style="text-align:center">'+vend+'</td><td class="num">'+fmt(inc)+'</td></tr>';
   });
 
   if(!righeTabSett) righeTabSett = '<tr><td colspan="5" style="text-align:center;color:var(--ink-light);padding:1.25rem">Nessun dato ancora per '+nomeMese+'</td></tr>';
-  if(!righeGiorni)  righeGiorni  = '<tr><td colspan="7" style="text-align:center;color:var(--ink-light);padding:1.25rem">Nessun dato ancora per '+nomeMese+'</td></tr>';
+  if(!righeGiorni)  righeGiorni  = '<tr><td colspan="9" style="text-align:center;color:var(--ink-light);padding:1.25rem">Nessun dato ancora per '+nomeMese+'</td></tr>';
+
+  // Funnel dinamico
+  var convHtml = totAnamnesi>0 ? tassoConv+'%' : '—';
+  var valMedioVend = totVendite>0&&totProdotti>0 ? fmt(totProdotti/totVendite) : '€0';
 
   document.getElementById('aggiornato').textContent = 'Aggiornato: '+new Date().toLocaleString('it-IT');
+  document.getElementById('funnel-clienti').textContent = totClienti||'0';
+  document.getElementById('funnel-anamnesi').textContent = totAnamnesi||'0';
+  document.getElementById('funnel-anamnesi-sub').textContent = totClienti>0?Math.round(totAnamnesi/totClienti*100)+'% dei clienti':'—';
+  document.getElementById('funnel-vendite').textContent = totVendite||'0';
+  document.getElementById('funnel-vendite-sub').textContent = convHtml+' delle anamn.';
+  document.getElementById('funnel-valore').textContent = totProdotti>0?fmt(totProdotti):'€0';
+  document.getElementById('funnel-valore-sub').textContent = valMedioVend+' medio/vendita';
 
   document.getElementById('contenuto').innerHTML =
     '<p class="sl">Riepilogo '+nomeMese+'</p>'+
@@ -377,7 +410,7 @@ function renderMese(dati, mese){
     '</table></div>'+
 
     '<div class="card"><p class="sl">Dettaglio giornaliero · Lun–Sab</p>'+
-    '<table><thead><tr><th>Data</th><th>Giorno</th><th>Clienti</th><th class="num">Tratt.</th><th class="num">Scontrino</th><th class="num">Prodotti</th><th class="num">Totale</th></tr></thead>'+
+    '<table><thead><tr><th>Data</th><th>Giorno</th><th>Clienti</th><th class="num">Tratt.</th><th class="num">Scontrino</th><th class="num">Prodotti</th><th style="text-align:center">Anamn.</th><th style="text-align:center">Vendite</th><th class="num">Totale</th></tr></thead>'+
     '<tbody>'+righeGiorni+'</tbody></table></div>'+
 
     '<div class="card card-accent"><p class="sl">Obiettivi '+nomeMese+'</p>'+
